@@ -34,7 +34,7 @@ exports.registerUser = async (req, res) => {
       { userId: savedUser._id, userRole: savedUser.role },
       process.env.TOKEN_KEY,
       {
-        expiresIn: "3h",
+        expiresIn: "24h",
       }
     );
 
