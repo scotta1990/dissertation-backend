@@ -55,7 +55,7 @@ require("./db");
 
 //Add middleware
 app.use(helmet());
-app.use(cors({ origin: process.env.DEV_ENV ? "http://192.168.1.110" : "*" }));
+app.use(cors({ origin: process.env.DEV_ENV ? "http://192.168.1.110" : [] }));
 app.use(express.json());
 
 //Add router middleware
@@ -69,5 +69,12 @@ app.use("/api/workouts", auth.verifyToken, workoutsRouter);
 app.use("/api/yourMeasurements", auth.verifyToken, yourMeasurementsRouter);
 
 app.listen(process.env.PORT || 3000, () => {
+  console.log(
+    `${
+      process.env.DEV_ENV
+        ? "DEV ENVIRONMENT RUNNING"
+        : "PROD ENVIRONMENT RUNNING"
+    }`
+  );
   console.log(`Port is listening on ${process.env.PORT}`);
 });
