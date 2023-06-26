@@ -55,7 +55,7 @@ require("./db");
 
 //Add middleware
 app.use(helmet());
-app.use(cors({ origin: "http://192.168.1.110" }));
+app.use(cors({ origin: process.env.DEV_ENV ? "http://192.168.1.110" : "*" }));
 app.use(express.json());
 
 //Add router middleware
