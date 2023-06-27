@@ -55,12 +55,15 @@ require("./db");
 
 //Add middleware
 app.use(helmet());
-app.use(cors({ origin: process.env.DEV_ENV ? "http://192.168.1.110" : [] }));
+app.use(cors());
 app.use(express.json());
 
 //Add health point
-app.use("/health", (req, res) => {
+app.get("/health", (req, res) => {
   res.status(200).send("Success");
+});
+app.get("/", (req,res) => {
+  res.status(200).send("Index")
 });
 
 //Add router middleware
