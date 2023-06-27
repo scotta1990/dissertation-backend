@@ -58,6 +58,11 @@ app.use(helmet());
 app.use(cors({ origin: process.env.DEV_ENV ? "http://192.168.1.110" : [] }));
 app.use(express.json());
 
+//Add health point
+app.use("/health", (req, res) => {
+  res.status(200).send("Success");
+});
+
 //Add router middleware
 app.use("/api/user", userRouter);
 app.use(
