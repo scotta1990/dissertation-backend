@@ -66,6 +66,7 @@ app.get("/", (req,res) => {
   res.status(200).send("Index")
 });
 
+
 //Add router middleware
 app.use("/api/user", userRouter);
 app.use(
