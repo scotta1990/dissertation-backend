@@ -70,7 +70,7 @@ exports.getMeasurementsProfile = async (req, res) => {
 //   }
 // };
 
-// exports.getAllBodyMeasurementsByType = async (req, res) => {
+// exports.getBodyMeasurementsByType = async (req, res) => {
 //   try {
 //     const bodyMeasurements = await BodyMeasurement.find({
 //       userId: req.user.userId,
@@ -81,6 +81,79 @@ exports.getMeasurementsProfile = async (req, res) => {
 //     return res.status(400).send("Error finding body measurements");
 //   }
 // };
+
+exports.getRecentBodyMeasurementsByType = async (req, res) => {
+  // Returns data for the measurementType provided for the last 42 days
+  console.log(
+    `Get measurements for type ${req.query.measurementTypeId} request made by ${req.user.userId}`
+  );
+
+  //Create the lower bound date to based on the weeks value
+  const weeks = 4;
+  const lowerBoundDate = new Date();
+  const day = lowerBoundDate.getDate() - 7 * weeks;
+  lowerBoundDate.setDate(day);
+
+  try {
+    const measurements = await Measurement.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(req.user.userId),
+          measurementTypeId: new mongoose.Types.ObjectId(
+            req.query.measurementTypeId
+          ),
+        },
+      },
+      {
+        $addFields: {
+          DateString: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$dateCreated",
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          Date: {
+            $dateFromString: {
+              dateString: "$DateString",
+            },
+          },
+        },
+      },
+      {
+        $densify: {
+          field: "Date",
+          range: {
+            step: 1,
+            unit: "day",
+            bounds: [lowerBoundDate, new Date()],
+          },
+        },
+      },
+      {
+        $addFields: {
+          DateString: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$Date",
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          Date: 1,
+        },
+      },
+    ]);
+    return res.status(200).send(measurements);
+  } catch (error) {
+    return res.status(400).send("Error getting measurements for user");
+  }
+};
 
 exports.addMeasurement = async (req, res) => {
   console.log(`Add measurement request made by ${req.user.userId}`);
