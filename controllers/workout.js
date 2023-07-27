@@ -107,7 +107,6 @@ exports.getRecentExerciseData = async (req, res) => {
         },
       },
     ]);
-    console.log(exerciseData);
     return res.status(200).send(exerciseData);
   } catch (error) {
     console.log(error);
