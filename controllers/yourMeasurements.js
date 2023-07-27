@@ -70,7 +70,7 @@ exports.getMeasurementsProfile = async (req, res) => {
 //   }
 // };
 
-// exports.getAllBodyMeasurementsByType = async (req, res) => {
+// exports.getBodyMeasurementsByType = async (req, res) => {
 //   try {
 //     const bodyMeasurements = await BodyMeasurement.find({
 //       userId: req.user.userId,
@@ -81,6 +81,79 @@ exports.getMeasurementsProfile = async (req, res) => {
 //     return res.status(400).send("Error finding body measurements");
 //   }
 // };
+
+exports.getRecentBodyMeasurementsByType = async (req, res) => {
+  // Returns data for the measurementType provided for the last 42 days
+  console.log(
+    `Get measurements for type ${req.query.measurementTypeId} request made by ${req.user.userId}`
+  );
+
+  //Create the lower bound date to based on the weeks value
+  const weeks = 4;
+  const lowerBoundDate = new Date();
+  const day = lowerBoundDate.getDate() - 7 * weeks;
+  lowerBoundDate.setDate(day);
+
+  try {
+    const measurements = await Measurement.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(req.user.userId),
+          measurementTypeId: new mongoose.Types.ObjectId(
+            req.query.measurementTypeId
+          ),
+        },
+      },
+      {
+        $addFields: {
+          DateString: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$dateCreated",
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          Date: {
+            $dateFromString: {
+              dateString: "$DateString",
+            },
+          },
+        },
+      },
+      // {
+      //   $densify: {
+      //     field: "Date",
+      //     range: {
+      //       step: 1,
+      //       unit: "day",
+      //       bounds: [lowerBoundDate, new Date()],
+      //     },
+      //   },
+      // },
+      {
+        $addFields: {
+          DateString: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$Date",
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          Date: 1,
+        },
+      },
+    ]);
+    return res.status(200).send(measurements);
+  } catch (error) {
+    return res.status(400).send("Error getting measurements for user");
+  }
+};
 
 exports.addMeasurement = async (req, res) => {
   console.log(`Add measurement request made by ${req.user.userId}`);
@@ -102,14 +175,20 @@ exports.addMeasurement = async (req, res) => {
   //Check if the measurement already exists for this date, and replace if so
 
   //Set the date for the comparison, date is set to today at midnight and ISOString for mongodb
-  const queryDate = new Date();
-  queryDate.setHours(0);
-  queryDate.setMinutes(0);
-  queryDate.setSeconds(0);
+  var startDate = new Date();
+  var endDate = new Date();
+  if (req.body.dateCreated) {
+    startDate = new Date(req.body.dateCreated);
+    endDate = new Date(req.body.dateCreated);
+  }
+  startDate.setHours(0);
+  startDate.setMinutes(0);
+  startDate.setSeconds(0);
+  endDate.setDate(startDate.getDate() + 1);
 
   const measurementExists = await Measurement.findOne({
     userId: req.user.userId,
-    dateCreated: { $gt: queryDate.toISOString() },
+    dateCreated: { $gte: startDate.toISOString(), $lt: endDate.toISOString() },
     measurementTypeId: req.body.measurementTypeId,
   });
 
@@ -127,11 +206,23 @@ exports.addMeasurement = async (req, res) => {
   }
 
   //Create the new body measurement object
-  const newMeasurement = new Measurement({
-    measurementTypeId: req.body.measurementTypeId,
-    value: req.body.value,
-    userId: req.user.userId,
-  });
+  var newMeasurement;
+  if (req.body.dateCreated) {
+    console.log(req.dateCreated);
+    newMeasurement = new Measurement({
+      measurementTypeId: req.body.measurementTypeId,
+      value: req.body.value,
+      userId: req.user.userId,
+      dateCreated: new Date(req.body.dateCreated),
+    });
+  } else {
+    newMeasurement = new Measurement({
+      measurementTypeId: req.body.measurementTypeId,
+      value: req.body.value,
+      userId: req.user.userId,
+    });
+  }
+  console.log(newMeasurement);
 
   try {
     //Save to the db and respond

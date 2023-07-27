@@ -51,6 +51,7 @@ const yourMeasurementsController = require("../controllers/yourMeasurements");
 // );
 
 router.get("/profile", yourMeasurementsController.getMeasurementsProfile);
+router.get("/", yourMeasurementsController.getRecentBodyMeasurementsByType);
 
 router.post("/", yourMeasurementsController.addMeasurement);
 // router.put("/:id", bodyMeasurementController.updateBodyMeasurement);

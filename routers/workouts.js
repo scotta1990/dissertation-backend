@@ -7,4 +7,7 @@ router.get("/", workoutController.getAllWorkouts);
 //Add a workout
 router.post("/", workoutController.addWorkout);
 
+//Get exercise data
+router.get("/exercise/data", workoutController.getRecentExerciseData);
+
 module.exports = router;

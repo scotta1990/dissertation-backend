@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+
 const Workout = require("../models/workout");
 
 //Get all workouts
@@ -28,5 +30,86 @@ exports.addWorkout = async (req, res) => {
     res.send(savedWorkout);
   } catch (error) {
     return res.status(400).send("Error adding workout: " + error);
+  }
+};
+
+//Get exercise data
+exports.getRecentExerciseData = async (req, res) => {
+  console.log(`Get recent exercise data request made by ${req.user.userId}`);
+  try {
+    const exerciseData = await Workout.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(req.user.userId),
+        },
+      },
+      {
+        $unwind: {
+          path: "$workoutItems",
+        },
+      },
+      {
+        $group: {
+          _id: "$workoutItems.exerciseId",
+          exerciseData: {
+            $push: {
+              date: "$startDate",
+              DateString: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: "$startDate",
+                },
+              },
+              displaySets: "$workoutItems.sets",
+              counts: {
+                $map: {
+                  input: "$workoutItems.sets.count",
+                  as: "data",
+                  in: {
+                    $convert: {
+                      input: "$$data",
+                      to: "int",
+                      onError: 0,
+                    },
+                  },
+                },
+              },
+              measurements: {
+                $map: {
+                  input: "$workoutItems.sets.measurement",
+                  as: "data",
+                  in: {
+                    $convert: {
+                      input: "$$data",
+                      to: "int",
+                      onError: 0,
+                    },
+                  },
+                },
+              },
+              value: {
+                $avg: {
+                  $map: {
+                    input: "$workoutItems.sets.measurement",
+                    as: "data",
+                    in: {
+                      $convert: {
+                        input: "$$data",
+                        to: "int",
+                        onError: 0,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    ]);
+    return res.status(200).send(exerciseData);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Error getting recent exercise data");
   }
 };
