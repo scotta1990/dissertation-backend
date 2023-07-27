@@ -123,16 +123,16 @@ exports.getRecentBodyMeasurementsByType = async (req, res) => {
           },
         },
       },
-      {
-        $densify: {
-          field: "Date",
-          range: {
-            step: 1,
-            unit: "day",
-            bounds: [lowerBoundDate, new Date()],
-          },
-        },
-      },
+      // {
+      //   $densify: {
+      //     field: "Date",
+      //     range: {
+      //       step: 1,
+      //       unit: "day",
+      //       bounds: [lowerBoundDate, new Date()],
+      //     },
+      //   },
+      // },
       {
         $addFields: {
           DateString: {
@@ -175,14 +175,20 @@ exports.addMeasurement = async (req, res) => {
   //Check if the measurement already exists for this date, and replace if so
 
   //Set the date for the comparison, date is set to today at midnight and ISOString for mongodb
-  const queryDate = new Date();
-  queryDate.setHours(0);
-  queryDate.setMinutes(0);
-  queryDate.setSeconds(0);
+  var startDate = new Date();
+  var endDate = new Date();
+  if (req.body.dateCreated) {
+    startDate = new Date(req.body.dateCreated);
+    endDate = new Date(req.body.dateCreated);
+  }
+  startDate.setHours(0);
+  startDate.setMinutes(0);
+  startDate.setSeconds(0);
+  endDate.setDate(startDate.getDate() + 1);
 
   const measurementExists = await Measurement.findOne({
     userId: req.user.userId,
-    dateCreated: { $gt: queryDate.toISOString() },
+    dateCreated: { $gte: startDate.toISOString(), $lt: endDate.toISOString() },
     measurementTypeId: req.body.measurementTypeId,
   });
 
@@ -200,11 +206,23 @@ exports.addMeasurement = async (req, res) => {
   }
 
   //Create the new body measurement object
-  const newMeasurement = new Measurement({
-    measurementTypeId: req.body.measurementTypeId,
-    value: req.body.value,
-    userId: req.user.userId,
-  });
+  var newMeasurement;
+  if (req.body.dateCreated) {
+    console.log(req.dateCreated);
+    newMeasurement = new Measurement({
+      measurementTypeId: req.body.measurementTypeId,
+      value: req.body.value,
+      userId: req.user.userId,
+      dateCreated: new Date(req.body.dateCreated),
+    });
+  } else {
+    newMeasurement = new Measurement({
+      measurementTypeId: req.body.measurementTypeId,
+      value: req.body.value,
+      userId: req.user.userId,
+    });
+  }
+  console.log(newMeasurement);
 
   try {
     //Save to the db and respond
