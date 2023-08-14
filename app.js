@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const userRouter = require("./routers/user");
 const yourMeasurementsRouter = require("./routers/yourMeasurements");
 const workoutsRouter = require("./routers/workouts");
+const goalsRouter = require("./routers/goals");
 const auth = require("./middleware/auth");
 const roleRestriction = require("./middleware/roleRestriction");
 //Create express app
@@ -62,10 +63,9 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.status(200).send("Success");
 });
-app.get("/", (req,res) => {
-  res.status(200).send("Index")
+app.get("/", (req, res) => {
+  res.status(200).send("Index");
 });
-
 
 //Add router middleware
 app.use("/api/user", userRouter);
@@ -76,6 +76,7 @@ app.use(
 ); //need to write the router and controller
 app.use("/api/workouts", auth.verifyToken, workoutsRouter);
 app.use("/api/yourMeasurements", auth.verifyToken, yourMeasurementsRouter);
+app.use("/api/goals", auth.verifyToken, goalsRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(
