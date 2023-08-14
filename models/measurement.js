@@ -12,7 +12,7 @@ const measurementSchema = new mongoose.Schema({
   },
   dateCreated: {
     type: Date,
-    default: new Date(),
+    default: Date.now,
   },
   userId: {
     type: mongoose.Schema.ObjectId,
