@@ -1,14 +1,16 @@
 const mongoose = require("mongoose");
 
-const measurementSchema = new mongoose.Schema({
-  measurementTypeId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "MeasurementType",
+const goalSchema = new mongoose.Schema({
+  type: {
+    type: String,
     required: true,
+    default: "Workout",
+    enum: ["Workout", "Exercise", "Measurement"],
   },
   value: {
     type: Number,
     required: true,
+    default: 0,
   },
   dateCreated: {
     type: Date,
@@ -21,4 +23,4 @@ const measurementSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Measurement", measurementSchema);
+module.exports = mongoose.model("Goal", goalSchema);
