@@ -5,6 +5,8 @@ const userRouter = require("./routers/user");
 const yourMeasurementsRouter = require("./routers/yourMeasurements");
 const workoutsRouter = require("./routers/workouts");
 const goalsRouter = require("./routers/goals");
+const featuresAdminRouter = require("./routers/featuresAdmin");
+const featuresRouter = require("./routers/features");
 const auth = require("./middleware/auth");
 const roleRestriction = require("./middleware/roleRestriction");
 //Create express app
@@ -77,6 +79,13 @@ app.use(
 app.use("/api/workouts", auth.verifyToken, workoutsRouter);
 app.use("/api/yourMeasurements", auth.verifyToken, yourMeasurementsRouter);
 app.use("/api/goals", auth.verifyToken, goalsRouter);
+app.use(
+  "/api/features/admin",
+  auth.verifyToken,
+  roleRestriction.rolePermissions(["Admin"]),
+  featuresAdminRouter
+);
+app.use("/api/features", featuresRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log(
