@@ -7,6 +7,14 @@ const goalSchema = new mongoose.Schema({
     default: "Workout",
     enum: ["Workout", "Exercise", "Measurement"],
   },
+  itemId: {
+    type: String,
+    required: false,
+  },
+  itemName: {
+    type: String,
+    required: false,
+  },
   value: {
     type: Number,
     required: true,
