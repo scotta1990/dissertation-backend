@@ -55,6 +55,27 @@ exports.getWorkoutGoal = async (req, res) => {
   }
 };
 
+exports.getGoalByItemId = async (req, res) => {
+  console.log(
+    `Goal for item ${req.body.itemId} request made by ${req.user.userId}`
+  );
+
+  try {
+    const goalData = await Goal.aggregate([
+      {
+        $match: {
+          itemId: req.body.itemId,
+        },
+      },
+    ]);
+
+    return res.status(200).send(goalData);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Error getting specific goal for item");
+  }
+};
+
 exports.getGoalSuggestion = async (req, res) => {
   console.log(
     `${req.body.type} goal suggestion request made by ${req.user.userId} for ${req.body.itemId}`
@@ -116,10 +137,9 @@ exports.getGoalSuggestion = async (req, res) => {
             mostRecent: 1,
           },
         },
-        
       ]);
-      
-      return res.status(200).send(recentExercise)
+
+      return res.status(200).send(recentExercise);
     } catch (error) {
       console.log(error);
       return res.status(400).send("Error getting goal suggestion for exercise");

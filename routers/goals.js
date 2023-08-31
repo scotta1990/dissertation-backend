@@ -10,4 +10,7 @@ router.post("/", goalsController.addGoal);
 //Get workout goal
 router.get("/workout", goalsController.getWorkoutGoal);
 
+//Get goal by a specific item
+router.get("/specific", goalsController.getGoalByItemId);
+
 module.exports = router;
