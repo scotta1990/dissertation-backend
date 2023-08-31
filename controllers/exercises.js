@@ -24,10 +24,11 @@ const updateExerciseDataFile = async () => {
 const getExerciseData = async () => {
   try {
     const stats = await fs.stat(exerciseFilePath);
-    var oneDay = new Date().getTime() + 1 * 24 * 60 * 60 * 1000;
-    if (new Date(stats.mtime) > oneDay) {
+    var oneDay = new Date().getTime() - 1 * 24 * 60 * 60 * 1000;
+
+    if (new Date(stats.mtime) < new Date(oneDay)) {
+      console.log(`temp-exercise updated being called`);
       const data = await updateExerciseDataFile();
-      console.log(data);
       return data;
     } else {
       const data = await fs.readFile(exerciseFilePath);
