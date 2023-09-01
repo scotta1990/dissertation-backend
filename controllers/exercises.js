@@ -17,6 +17,7 @@ const updateExerciseDataFile = async () => {
     const file = await fs.writeFile(exerciseFilePath, json);
     return response.data;
   } catch (error) {
+    console.log(error)
     return error;
   }
 };
@@ -36,6 +37,7 @@ const getExerciseData = async () => {
     }
   } catch (error) {
     if (error.code === "ENOENT") {
+      console.log(`temp-exercise updated being called`);
       const data = await updateExerciseDataFile();
       return data;
     }
