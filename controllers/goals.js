@@ -57,14 +57,14 @@ exports.getWorkoutGoal = async (req, res) => {
 
 exports.getGoalByItemId = async (req, res) => {
   console.log(
-    `Goal for item ${req.body.itemId} request made by ${req.user.userId}`
+    `Goal for item ${req.query.itemId} request made by ${req.user.userId}`
   );
 
   try {
     const goalData = await Goal.aggregate([
       {
         $match: {
-          itemId: req.body.itemId,
+          itemId: req.query.itemId,
         },
       },
     ]);
