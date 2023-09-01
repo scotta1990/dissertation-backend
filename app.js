@@ -7,6 +7,7 @@ const workoutsRouter = require("./routers/workouts");
 const goalsRouter = require("./routers/goals");
 const featuresAdminRouter = require("./routers/featuresAdmin");
 const featuresRouter = require("./routers/features");
+const exercisesRouter = require("./routers/exercises");
 const auth = require("./middleware/auth");
 const roleRestriction = require("./middleware/roleRestriction");
 //Create express app
@@ -79,6 +80,7 @@ app.use(
 app.use("/api/workouts", auth.verifyToken, workoutsRouter);
 app.use("/api/yourMeasurements", auth.verifyToken, yourMeasurementsRouter);
 app.use("/api/goals", auth.verifyToken, goalsRouter);
+app.use("/api/exercises", auth.verifyToken, exercisesRouter);
 app.use(
   "/api/features/admin",
   auth.verifyToken,
