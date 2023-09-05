@@ -1,1 +1,1 @@
-
+Folder for temporary data pulled from exercise RapidAPI
